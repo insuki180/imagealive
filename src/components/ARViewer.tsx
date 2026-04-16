@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase';
 
 export default function ARViewer({ projectId }: { projectId: string }) {
   const [projectData, setProjectData] = useState<any>(null);
+  const [aspectRatio, setAspectRatio] = useState(1);
   const [librariesLoaded, setLibrariesLoaded] = useState(false);
   const targetRef = useRef<any>(null);
 
@@ -15,7 +16,12 @@ export default function ARViewer({ projectId }: { projectId: string }) {
     async function init() {
       // 1. Fetch DB
       const { data } = await supabase.from('projects').select('*').eq('id', projectId).single();
-      if (data) setProjectData(data);
+      if (data) {
+        setProjectData(data);
+        const img = new Image();
+        img.src = data.image_url;
+        img.onload = () => setAspectRatio(img.height / img.width);
+      }
 
       // 2. Load A-Frame script dynamically
       await new Promise<void>((resolve) => {
@@ -103,7 +109,7 @@ export default function ARViewer({ projectId }: { projectId: string }) {
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
         <a-entity mindar-image-target="targetIndex: 0" ref={targetRef}>
-          <a-video src="#ar-video" position="0 0 0" width="1" height="1"></a-video>
+          <a-video src="#ar-video" position="0 0 0" width="1" height={aspectRatio}></a-video>
         </a-entity>
       </a-scene>
 

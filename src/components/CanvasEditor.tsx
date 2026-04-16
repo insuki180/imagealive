@@ -13,6 +13,7 @@ export default function CanvasEditor({ projectId }: { projectId: string }) {
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [photoImg, setPhotoImg] = useState<HTMLImageElement | null>(null);
   const [qrImg, setQrImg] = useState<HTMLImageElement | null>(null);
+  const [hideQR, setHideQR] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // A4 aspect ratio at screen resolution suitable for manipulation
@@ -71,6 +72,10 @@ export default function CanvasEditor({ projectId }: { projectId: string }) {
       <div className="text-center">
         <h2 className="text-2xl font-bold text-white mb-2">Editor</h2>
         <p className="text-gray-400">Your photo and the generated AR code are placed on an standard A4 layout. Click 'Download PDF' to export and print!</p>
+        <label className="flex items-center justify-center gap-2 mt-4 text-white cursor-pointer bg-gray-800 py-2 px-4 rounded-lg hover:bg-gray-700 w-max mx-auto shadow">
+          <input type="checkbox" checked={hideQR} onChange={(e) => setHideQR(e.target.checked)} className="w-4 h-4 cursor-pointer" />
+          Hide QR Code from printed photo (Share URL separately to trigger AR magically!)
+        </label>
       </div>
 
       <div className="bg-white p-2 rounded-md shadow-2xl overflow-hidden" style={{ width: CANVAS_WIDTH + 16 }}>
@@ -92,7 +97,7 @@ export default function CanvasEditor({ projectId }: { projectId: string }) {
               )}
 
               {/* QR Code placed at bottom right */}
-              {qrImg && (
+              {!hideQR && qrImg && (
                 <KonvaImage 
                   image={qrImg} 
                   x={CANVAS_WIDTH - 180} 
@@ -103,15 +108,17 @@ export default function CanvasEditor({ projectId }: { projectId: string }) {
                 />
               )}
 
-              <Text 
-                text="Scan this QR code and point your camera at the photo to bring it to life!" 
-                x={50} 
-                y={CANVAS_HEIGHT - 100} 
-                width={CANVAS_WIDTH - 250} 
-                fontSize={16} 
-                fill="#333" 
-                align="left"
-              />
+              {!hideQR && (
+                <Text 
+                  text="Scan this QR code and point your camera at the photo to bring it to life!" 
+                  x={50} 
+                  y={CANVAS_HEIGHT - 100} 
+                  width={CANVAS_WIDTH - 250} 
+                  fontSize={16} 
+                  fill="#333" 
+                  align="left"
+                />
+              )}
             </Layer>
           </Stage>
         </div>
