@@ -102,28 +102,34 @@ export default function ARViewer({ projectId }: { projectId: string }) {
             preload="auto" 
             loop
             playsInline
-            muted={false} // May require user interaction to unmute depending on mobile browser policy, or we start muted and add an unmute UI button. For MVP, many users will click the 'play' or tap screen. Let's keep it unmuted to test PRD requirement, but be aware of safari autoplay policies.
+            muted
           />
         </a-assets>
 
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
         <a-entity mindar-image-target="targetIndex: 0" ref={targetRef}>
-          <a-video src="#ar-video" position="0 0 0" width="1" height={aspectRatio}></a-video>
+          <a-plane 
+            src="#ar-video" 
+            material="shader: flat; side: double" 
+            position="0 0 0.001" 
+            width="1" 
+            height={aspectRatio}
+          ></a-plane>
         </a-entity>
       </a-scene>
 
       {/* Overlay for user interaction prompt to bypass autoplay policies */}
       <div className="absolute top-0 w-full p-4 bg-black/50 text-white text-center pointer-events-none z-10 flex flex-col items-center gap-2">
-        <span>Point camera at your photo. TAP screen to unmute/ensure playback.</span>
+        <span>Point camera at your photo. TAP screen to unmute audio.</span>
       </div>
       
-      {/* Invisible screen tap overlay for Audio Context initialization */}
+      {/* Tap overlay to unmute audio (video starts muted for autoplay compatibility) */}
       <div 
         className="absolute inset-0 z-0" 
         onClick={() => {
             const v = document.getElementById('ar-video') as HTMLVideoElement;
-            if (v) { v.muted = false; v.play(); v.pause(); } // primes the audio
+            if (v) { v.muted = false; v.play().catch(() => {}); }
         }}
       />
     </div>
