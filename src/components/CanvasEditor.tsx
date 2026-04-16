@@ -14,6 +14,8 @@ export default function CanvasEditor({ projectId }: { projectId: string }) {
   const [photoImg, setPhotoImg] = useState<HTMLImageElement | null>(null);
   const [qrImg, setQrImg] = useState<HTMLImageElement | null>(null);
   const [hideQR, setHideQR] = useState(false);
+  const [qrSize, setQrSize] = useState(150);
+  const [qrOpacity, setQrOpacity] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // A4 aspect ratio at screen resolution suitable for manipulation
@@ -72,10 +74,26 @@ export default function CanvasEditor({ projectId }: { projectId: string }) {
       <div className="text-center">
         <h2 className="text-2xl font-bold text-white mb-2">Editor</h2>
         <p className="text-gray-400">Your photo and the generated AR code are placed on an standard A4 layout. Click 'Download PDF' to export and print!</p>
-        <label className="flex items-center justify-center gap-2 mt-4 text-white cursor-pointer bg-gray-800 py-2 px-4 rounded-lg hover:bg-gray-700 w-max mx-auto shadow">
-          <input type="checkbox" checked={hideQR} onChange={(e) => setHideQR(e.target.checked)} className="w-4 h-4 cursor-pointer" />
-          Hide QR Code from printed photo (Share URL separately to trigger AR magically!)
-        </label>
+        
+        <div className="bg-gray-800 p-4 rounded-lg shadow mt-4 max-w-lg mx-auto border border-gray-700">
+          <label className="flex items-center justify-center gap-2 text-white cursor-pointer hover:text-gray-300 w-max mx-auto mb-3">
+            <input type="checkbox" checked={hideQR} onChange={(e) => setHideQR(e.target.checked)} className="w-4 h-4 cursor-pointer accent-blue-500" />
+            Completely Hide QR Code
+          </label>
+
+          {!hideQR && (
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm mt-2 border-t border-gray-700 pt-3">
+              <label className="flex flex-col text-gray-300 w-full">
+                <span>QR Size: {qrSize}px (Micro QR)</span>
+                <input type="range" min="30" max="300" value={qrSize} onChange={(e) => setQrSize(Number(e.target.value))} className="mt-1" />
+              </label>
+              <label className="flex flex-col text-gray-300 w-full">
+                <span>Blend Opacity: {Math.round(qrOpacity * 100)}%</span>
+                <input type="range" min="0.05" max="1" step="0.05" value={qrOpacity} onChange={(e) => setQrOpacity(Number(e.target.value))} className="mt-1" />
+              </label>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="bg-white p-2 rounded-md shadow-2xl overflow-hidden" style={{ width: CANVAS_WIDTH + 16 }}>
@@ -96,14 +114,15 @@ export default function CanvasEditor({ projectId }: { projectId: string }) {
                 />
               )}
 
-              {/* QR Code placed at bottom right */}
+              {/* QR Code placed dynamically */}
               {!hideQR && qrImg && (
                 <KonvaImage 
                   image={qrImg} 
-                  x={CANVAS_WIDTH - 180} 
-                  y={CANVAS_HEIGHT - 180} 
-                  width={150} 
-                  height={150} 
+                  x={CANVAS_WIDTH - qrSize - 30} 
+                  y={CANVAS_HEIGHT - qrSize - 30} 
+                  width={qrSize} 
+                  height={qrSize} 
+                  opacity={qrOpacity}
                   draggable 
                 />
               )}
